@@ -1,6 +1,8 @@
 # PouchDB-JsonViews
 
 [![CI](https://github.com/garbados/pouchdb-jsonviews/actions/workflows/ci.yaml/badge.svg)](https://github.com/garbados/pouchdb-jsonviews/actions/workflows/ci.yaml)
+[![Coverage Status](https://coveralls.io/repos/github/garbados/pouchdb-jsonviews/badge.svg?branch=master)](https://coveralls.io/github/garbados/pouchdb-jsonviews?branch=master)
+[![Stability](https://img.shields.io/badge/stability-stable-green.svg?style=flat-square)](https://nodejs.org/api/documentation.html#documentation_stability_index)
 [![NPM Version](https://img.shields.io/npm/v/pouchdb-jsonviews.svg?style=flat-square)](https://www.npmjs.com/package/pouchdb-jsonviews)
 [![JS Standard Style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/feross/standard)
 

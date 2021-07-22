@@ -147,7 +147,7 @@ If you encounter a bug or would like to request a feature, please [file an issue
 To hack on this project locally, first get its source and install its dependencies:
 
 ```bash
-$ git clone TODO
+$ git clone git@github.com:garbados/pouchdb-jsonviews.git
 $ cd pouchdb-jsonviews
 $ npm i
 ```

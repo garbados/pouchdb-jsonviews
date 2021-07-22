@@ -1,5 +1,9 @@
 # PouchDB-JsonViews
 
+[![CI](https://github.com/garbados/pouchdb-jsonviews/actions/workflows/ci.yaml/badge.svg)](https://github.com/garbados/pouchdb-jsonviews/actions/workflows/ci.yaml)
+[![NPM Version](https://img.shields.io/npm/v/pouchdb-jsonviews.svg?style=flat-square)](https://www.npmjs.com/package/pouchdb-jsonviews)
+[![JS Standard Style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/feross/standard)
+
 A plugin that adds a JSON-based map/reduce view interface to PouchDB and CouchDB.
 
 Here is an example:

@@ -159,14 +159,36 @@ describe('pouchdb-jsonviews', function () {
         const { rows } = await this.db.query(`${DDOC_NAME}/${VIEW_NAME}`)
         assert.equal(rows.length, 3)
       })
-      it.skip('should splay a key array', async function () {
-        // TODO
+      it('should splay a key array', async function () {
+        await this.db.post({
+          user: 'garbados',
+          tags: ['a', 'b', 'c'],
+          description: 'hermit goblin'
+        })
+        await this.db.addJsonView(DDOC_NAME, VIEW_NAME, {
+          map: {
+            key: [
+              'user',
+              { access: 'tags', splay: true },
+              'description'
+            ]
+          }
+        })
+        const { rows } = await this.db.query(`${DDOC_NAME}/${VIEW_NAME}`)
+        assert.equal(rows.length, 3)
+        const [{ key: key1 }, { key: key2 }, { key: key3 }] = rows
+        assert.equal(key1[1], 'a')
+        assert.equal(key2[1], 'b')
+        assert.equal(key3[1], 'c')
+        const keys = [key1, key2, key3]
+        keys.forEach((key) => { assert.equal(key[0], 'garbados') })
+        keys.forEach((key) => { assert.equal(key[2], 'hermit goblin') })
       })
       it('should splay values', async function () {
         it('should splay a lone key', async function () {
           await this.db.post({ tags: ['a', 'b', 'c'] })
           await this.db.addJsonView(DDOC_NAME, VIEW_NAME, {
-            map: { key: 'tags', value: { access: 'tags', splay: true } }
+            map: { key: '_id', value: { access: 'tags', splay: true } }
           })
           const { rows } = await this.db.query(`${DDOC_NAME}/${VIEW_NAME}`)
           assert.equal(rows.length, 3)

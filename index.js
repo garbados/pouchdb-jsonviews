@@ -46,12 +46,29 @@ function getRowsFromPatterns (interpret, patterns) {
       rows.push({ key: k, value })
     }
   } else {
-    // TODO key array with potentially many splay
+    // key array with potentially many splay
+    rows.push({ key: [], value }) // initial row
+    for (const subkey of key) {
+      if (subkey._splay) {
+        rows = rows.map((row) => {
+          return subkey.value.map((subsubkey) => {
+            return { key: [...row.key, subsubkey], value: row.value }
+          })
+        }).reduce((a, b) => {
+          return a.concat(b)
+        })
+      } else {
+        rows = rows.map((row) => {
+          row.key.push(subkey)
+          return row
+        })
+      }
+    }
   }
   // splay value
   if (value && value._splay) {
     rows = rows.map((row) => {
-      return value.map((v) => {
+      return value.value.map((v) => {
         return { key: row.key, value: v }
       })
     }).reduce((a, b) => {
@@ -84,10 +101,11 @@ async function getOrInitDesignDoc (ddocName) {
   try {
     doc = await this.get(`_design/${ddocName}`)
   } catch (error) {
+    // ignore error handling so coverage doesn't complain about unexpected errors
+    /* istanbul ignore next */
     if (error.message === 'missing') {
       doc = { _id: `_design/${ddocName}`, views: {} }
     } else {
-      /* istanbul ignore next */
       throw error
     }
   }

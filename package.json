@@ -1,6 +1,6 @@
 {
   "name": "pouchdb-jsonviews",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A plugin that adds a JSON-based map/reduce view interface to PouchDB and CouchDB.",
   "main": "index.js",
   "scripts": {

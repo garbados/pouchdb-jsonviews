@@ -1,10 +1,10 @@
 /* istanbul ignore next */
 function interpretAccessPattern (doc, pattern) {
-  let value = doc
+  var value = doc
   if (typeof pattern === 'string') {
-    const access = pattern.split(/(?<!\\)\./)
-    for (let prop of access) {
-      prop = prop.split('\\.').join('.')
+    var access = pattern.split('\\.').join('\uffff').split('.')
+    for (var i = 0; i < access.length; i++) {
+      var prop = access[i].split('\uffff').join('.')
       value = value[prop]
       if (value === undefined) { break }
     }
@@ -24,56 +24,57 @@ function interpretAccessPattern (doc, pattern) {
       }
     }
   }
-  return pattern.splay ? { _splay: true, value } : value
+  return pattern.splay ? { _splay: true, value: value } : value
 }
 
 /* istanbul ignore next */
 function getRowsFromPatterns (interpret, patterns) {
-  let rows = []
+  var rows = []
   // get key and value
-  const value = patterns.value ? interpret(patterns.value) : undefined
-  let key
-  if (!Array.isArray(patterns.key)) {
-    key = interpret(patterns.key)
-  } else {
+  var value = patterns.value ? interpret(patterns.value) : undefined
+  var key
+  if (typeof patterns.key === 'object' && typeof patterns.key.length === 'number') {
     key = patterns.key.map(interpret)
+  } else {
+    key = interpret(patterns.key)
   }
   // handle splay, rotating rows matrix as necessary
   if (!key || typeof key === 'string') {
-    rows.push({ key, value })
+    rows.push({ key: key, value: value })
   } else if (key._splay) {
-    for (const k of key.value) {
-      rows.push({ key: k, value })
-    }
+    key.value.forEach(function (subkey) {
+      rows.push({ key: subkey, value: value })
+    })
   } else {
     // key array with potentially many splay
-    rows.push({ key: [], value }) // initial row
-    for (const subkey of key) {
+    rows.push({ key: [], value: value }) // initial row
+    key.forEach(function (subkey) {
       if (subkey._splay) {
         // multiply rows by new key
-        rows = rows.map((row) => {
-          return subkey.value.map((subsubkey) => {
-            return { key: [...row.key, subsubkey], value: row.value }
+        rows = rows.map(function (row) {
+          return subkey.value.map(function (subsubkey) {
+            const newKey = row.key.concat(subsubkey)
+            return { key: newKey, value: row.value }
           })
-        }).reduce((a, b) => {
+        }).reduce(function (a, b) {
           return a.concat(b)
         })
       } else {
         // add key to existing rows
-        rows = rows.map((row) => {
+        rows = rows.map(function (row) {
           row.key.push(subkey)
           return row
         })
       }
-    }
+    })
   }
   // splay value
   if (value && value._splay) {
-    rows = rows.map((row) => {
-      return value.value.map((v) => {
-        return { key: row.key, value: v }
+    rows = rows.map(function (row) {
+      return value.value.map(function (subvalue) {
+        return { key: row.key, value: subvalue }
       })
-    }).reduce((a, b) => {
+    }).reduce(function (a, b) {
       return a.concat(b)
     })
   }
@@ -91,7 +92,7 @@ function interpretJsonView (jsonview) {
   const patterns = ${JSON.stringify(jsonview.map)}
   const rows = getRowsFromPatterns(interpret, patterns)
   // emit rows
-  for (const row of rows) { emit(row.key, row.value) }
+  rows.forEach(function (row) { emit(row.key, row.value) })
 }`
   return { map, reduce: jsonview.reduce }
 }

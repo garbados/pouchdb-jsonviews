@@ -4,7 +4,7 @@ function interpretAccessPattern (doc, pattern) {
   if (typeof pattern === 'string') {
     const access = pattern.split(/(?<!\\)\./)
     for (let prop of access) {
-      prop = prop.replaceAll(/\\\./ig, '.')
+      prop = prop.split('\\.').join('.')
       value = value[prop]
       if (value === undefined) { break }
     }

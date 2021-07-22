@@ -30,6 +30,9 @@ jobs:
 
       - run: npm ci
 
+      # install chromium manually
+      - run: node node_modules/puppeteer/install.js
+
       - name: unit test
         run: npm test
 

@@ -54,9 +54,9 @@ console.log(rows)
 
 Although Mango is a powerful query language in its own right -- and PouchDB-JsonViews is not intended as a competitor or replacement! -- it does not allow you to use a reduce function. This forces certain classes of queries to occur in-memory, on-demand, page by page, which is simply not tenable for certain scales of data.
 
-However, the alternative of writing JavaScript views lends itself to the worse of our tendencies as programmers: to inefficient mutations of data that are impossible to examine or debug. These can create showstopping problems as datasets scale, as the size of indices may explode out of control due to errors and oversights. It is unwise to permit ourselves so much room for failure.
+However, the alternative of writing JavaScript views lends itself to the worse of our tendencies as programmers: to inefficient mutations of data that are impossible to examine or debug. These can create showstopping problems as datasets scale, as the size of indices may explode out of control due to errors and oversights. It is unwise to permit ourselves so much room for failure, grateful for it though we may be from time to time.
 
-Most of the time, a view just emits a certain number of keys and a value, and maybe specifies a reduce function. PouchDB-JsonViews uses a simple access syntax to specify document attributes for keys and values, and exposes a small number of *transforms* which convert a value in some way (such as generating a time or date string from a timestamp, with `date` and `time`). In this way, much as Mango simplifies queries with selectors, this plugin does the same with what it calls *JsonViews*.
+Usually, a view just emits a certain number of keys and a value, and maybe specifies a reduce function. PouchDB-JsonViews uses a simple access syntax to specify document attributes for keys and values, and exposes a small number of *transforms* which convert a value in some way (such as generating a time or date string from a timestamp, with `date` and `time`). In this way, much as Mango simplifies queries with selectors, this plugin does the same with what it calls *JsonViews*.
 
 ## Install
 

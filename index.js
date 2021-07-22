@@ -50,6 +50,7 @@ function getRowsFromPatterns (interpret, patterns) {
     rows.push({ key: [], value }) // initial row
     for (const subkey of key) {
       if (subkey._splay) {
+        // multiply rows by new key
         rows = rows.map((row) => {
           return subkey.value.map((subsubkey) => {
             return { key: [...row.key, subsubkey], value: row.value }
@@ -58,6 +59,7 @@ function getRowsFromPatterns (interpret, patterns) {
           return a.concat(b)
         })
       } else {
+        // add key to existing rows
         rows = rows.map((row) => {
           row.key.push(subkey)
           return row
@@ -78,9 +80,10 @@ function getRowsFromPatterns (interpret, patterns) {
   return rows
 }
 
+// construct a javascript view from a jsonview
 function interpretJsonView (jsonview) {
-  const map = `
-function (doc) {
+  // template the js view using our helpers
+  const map = `function (doc) {
   // setup
   ${interpretAccessPattern.toString()}
   ${getRowsFromPatterns.toString()}
@@ -88,14 +91,12 @@ function (doc) {
   const patterns = ${JSON.stringify(jsonview.map)}
   const rows = getRowsFromPatterns(interpret, patterns)
   // emit rows
-  for (const row of rows) {
-    emit(row.key, row.value)
-  }
-}
-  `
+  for (const row of rows) { emit(row.key, row.value) }
+}`
   return { map, reduce: jsonview.reduce }
 }
 
+// retrieve a design document or construct a bare one for use
 async function getOrInitDesignDoc (ddocName) {
   let doc
   try {
@@ -112,6 +113,8 @@ async function getOrInitDesignDoc (ddocName) {
   return doc
 }
 
+// interpret a jsonview to add a view to a design doc, creating it if necessary.
+// will fail if a view already exists by the given name.
 async function addJsonView (ddocName, viewName, jsonview) {
   const view = interpretJsonView(jsonview)
   const doc = await getOrInitDesignDoc.call(this, ddocName)
@@ -123,6 +126,8 @@ async function addJsonView (ddocName, viewName, jsonview) {
   }
 }
 
+// interpret a jsonview to add a view to a design doc, creating it if necessary.
+// if a view already exists by the given name, it will be overwritten.
 async function putJsonView (ddocName, viewName, jsonview) {
   const view = interpretJsonView(jsonview)
   const doc = await getOrInitDesignDoc.call(this, ddocName)
@@ -130,6 +135,8 @@ async function putJsonView (ddocName, viewName, jsonview) {
   return this.put(doc)
 }
 
+// remove a view by name from a design doc.
+// will fail if no view exists with that name.
 async function removeView (ddocName, viewName) {
   const doc = await getOrInitDesignDoc.call(this, ddocName)
   if (viewName in doc.views) {

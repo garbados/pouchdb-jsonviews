@@ -21,6 +21,8 @@ targets.forEach(test)
 function test (dbName) {
   const dbType = /http:\/\//.test(dbName) ? 'http' : 'local'
   describe(dbType, function () {
+    this.timeout(1000 * 10) // ten seconds
+
     beforeEach(function () {
       this.db = new PouchDB(dbName)
     })

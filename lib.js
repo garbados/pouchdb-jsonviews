@@ -3,7 +3,8 @@ function transformValue (pattern, value) {
   // setup dates for datetime utils
   var datetime, dateparts, date, time, year, month, day, hour, minute, second, millisecond
   try {
-    datetime = new Date(value).toISOString()
+    var rawDate = new Date(value)
+    datetime = rawDate.toISOString()
     dateparts = datetime.split('T')
     date = dateparts[0].split('-')
     time = dateparts[1].split(':')
@@ -66,11 +67,11 @@ function transformValue (pattern, value) {
 
 /* istanbul ignore next */ // because you can't run coverage code through eval
 function interpretAccessPattern (doc, pattern) {
-  let value = doc
+  var value = doc
   if (typeof pattern === 'string') {
-    const access = pattern.split('\\.').join('\uffff').split('.')
-    for (let i = 0; i < access.length; i++) {
-      const prop = access[i].split('\uffff').join('.')
+    var access = pattern.split('\\.').join('\uffff').split('.')
+    for (var i = 0; i < access.length; i++) {
+      var prop = access[i].split('\uffff').join('.')
       value = value[prop]
       if (value === undefined) { break }
     }
@@ -86,7 +87,7 @@ function getRowsFromPatterns (interpret, patterns) {
   var rows = []
   // get key and value
   var value = patterns.value ? interpret(patterns.value) : undefined
-  let key
+  var key
   if (typeof patterns.key === 'object' && typeof patterns.key.length === 'number') {
     key = patterns.key.map(interpret)
   } else {
@@ -127,7 +128,7 @@ function getRowsFromPatterns (interpret, patterns) {
           // multiply rows by new key
           rows = rows.map(function (row) {
             return subkey.value.map(function (subsubkey) {
-              const newKey = row.key.concat(subsubkey)
+              var newKey = row.key.concat(subsubkey)
               return { key: newKey, value: row.value }
             })
           }).reduce(function (a, b) {

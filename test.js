@@ -1,6 +1,7 @@
 /* global describe, it, beforeEach, afterEach */
 
 const assert = require('assert').strict
+const lib = require('./lib')
 const PouchDB = require('pouchdb')
 PouchDB.plugin(require('.'))
 
@@ -26,6 +27,62 @@ function test (dbName) {
 
     afterEach(function () {
       return this.db.destroy()
+    })
+
+    describe('lib', function () {
+      // setup doc
+      const type = 'entry'
+      const title = 'hello world'
+      const text = 'how are you'
+      const tags = ['a', 'b', 'c']
+      const createdAt = Date.now()
+      const doc = { type, draft: true, tags, createdAt, title, text }
+
+      describe('transformValue', function () {
+        it('should annotate a value with splay', function () {
+          const value = lib.transformValue({ splay: true })
+          assert.equal(value.value, undefined)
+          assert.equal(value._splay, true)
+        })
+        // TODO additional testing
+      })
+      describe('interpretAccessPattern', function () {
+        it('should interpret emit, equals, inverse patterns correctly', function () {
+          // test equals
+          let value = lib.interpretAccessPattern(doc, {
+            access: 'type',
+            emit: true,
+            equals: type
+          })
+          assert.equal(value.value, type)
+          assert.equal(value._emit, true)
+          value = lib.interpretAccessPattern(doc, {
+            access: 'type',
+            emit: true,
+            equals: type,
+            invert: true
+          })
+          assert.equal(value.value, type)
+          assert.equal(value._emit, false)
+        })
+        // TODO additional testing
+      })
+      describe('getRowsFromPatterns', function () {
+        it('should flatten keys', function () {
+          const interpret = lib.interpretAccessPattern.bind(null, doc)
+          const rows = lib.getRowsFromPatterns(interpret, {
+            key: [
+              { access: 'type', emit: true, equals: type },
+              { access: 'createdAt', transform: 'date', flatten: true },
+              { access: 'tags', splay: true }
+            ]
+          })
+          assert.equal(rows.length, 3)
+          rows.forEach((row) => {
+            assert.equal(row.key.length, 4)
+          })
+        })
+      })
     })
 
     describe('api', function () {
@@ -130,12 +187,16 @@ function test (dbName) {
             })
             const { rows } = await this.db.query(`${DDOC_NAME}/${VIEW_NAME}`)
             assert.equal(rows.length, 1)
-            const [{ key: date }] = rows
-            assert(/\d{4,}-\d{2}-\d{2}/.test(date), date)
+            const [{ key: [year, month, day] }] = rows
+            assert.equal(typeof year, 'string')
+            assert.equal(typeof month, 'string')
+            assert.equal(month.length, 2)
+            assert.equal(typeof day, 'string')
+            assert.equal(day.length, 2)
           })
         })
         describe('time', function () {
-          it('should map a timestamp to a datetime', async function () {
+          it('should map a timestamp to a time', async function () {
             await this.db.post({ createdAt: Date.now() })
             await this.db.addJsonView(DDOC_NAME, VIEW_NAME, {
               map: { key: { access: 'createdAt', transform: 'time' } }
@@ -143,7 +204,7 @@ function test (dbName) {
             const { rows } = await this.db.query(`${DDOC_NAME}/${VIEW_NAME}`)
             assert.equal(rows.length, 1)
             const [{ key: date }] = rows
-            assert(/\d{2}:\d{2}:\d{2}.\d{3}Z/.test(date), date)
+            assert.equal(date.length, 4) // hours, minutes, seconds, milliseconds
           })
         })
         describe('datetime', function () {
@@ -155,7 +216,7 @@ function test (dbName) {
             const { rows } = await this.db.query(`${DDOC_NAME}/${VIEW_NAME}`)
             assert.equal(rows.length, 1)
             const [{ key: date }] = rows
-            assert(/\d{4,}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/.test(date), date)
+            assert.equal(date.length, 7)
           })
         })
       })

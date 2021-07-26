@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/garbados/pouchdb-jsonviews/actions/workflows/ci.yaml/badge.svg)](https://github.com/garbados/pouchdb-jsonviews/actions/workflows/ci.yaml)
 [![Coverage Status](https://coveralls.io/repos/github/garbados/pouchdb-jsonviews/badge.svg?branch=master)](https://coveralls.io/github/garbados/pouchdb-jsonviews?branch=master)
-[![Stability](https://img.shields.io/badge/stability-stable-green.svg?style=flat-square)](https://nodejs.org/api/documentation.html#documentation_stability_index)
+[![Stability](https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square)](https://nodejs.org/api/documentation.html#documentation_stability_index)
 [![NPM Version](https://img.shields.io/npm/v/pouchdb-jsonviews.svg?style=flat-square)](https://www.npmjs.com/package/pouchdb-jsonviews)
 [![JS Standard Style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/feross/standard)
 
@@ -75,9 +75,11 @@ PouchDB.plugin(require('pouchdb-jsonviews'))
 
 ## Usage, API
 
-This plugin adds four methods to PouchDB instances:
+This plugin adds some new methods to PouchDB instances:
 
 - `.interpretJsonView(jsonview)`
+- `.addView(ddocName, viewName, view)`
+- `.putView(ddocName, viewName, view)`
 - `.addJsonView(ddocName, viewName, jsonview)`
 - `.putJsonView(ddocName, viewName, jsonview)`
 - `.removeView(ddocName, viewName)`.
@@ -87,6 +89,7 @@ These common parameters are defined as such:
 - `ddocName`: The part of a design document's `_id` that follows `_design/`.
 For example, the ddocName of `_design/hello-world` is `hello-world`.
 - `viewName`: The name of a view.
+- `view`: A normal [JavaScript view](https://docs.couchdb.org/en/stable/ddocs/ddocs.html#view-functions).
 - `jsonview`: An object describing a JsonView, which this plugin can compile to a JavaScript view for the purpose of querying. See **Usage, JsonViews** for more information.
 
 ### db.interpretJsonView(jsonview)
@@ -94,19 +97,25 @@ For example, the ddocName of `_design/hello-world` is `hello-world`.
 A convenience method that returns the JavaScript view compiled from a given jsonview.
 Used internally, but might be of interest to the curious user.
 
-Does not modify the database!
+### async db.addView(ddocName, viewName, view)
+
+A convenience method that adds a view to a design document, creating it if necessary. *If a view already exists by this name, the method will throw an error.*
+
+Returns as though you had run [`db.put()`](https://pouchdb.com/api.html#create_document).
+
+### async db.putView(ddocName, viewName, view)
+
+A convenience method that adds a view to a design document, creating that document if necessary. *If a view already exists by this name, the view will be overwritten.*
+
+Returns as though you had run [`db.put()`](https://pouchdb.com/api.html#create_document).
 
 ### async db.addJsonView(ddocName, viewName, jsonview)
 
-Compiles a JsonView to a JavaScript view and adds it to a design document, creating that document if necessary. *If a view already exists by this name, the method will throw an error.*
-
-Returns as though you had run [`db.put()`](https://pouchdb.com/api.html#create_document).
+Compiles a JsonView to a JavaScript view and adds it to a design document, using `db.addView` under the hood.
 
 ### async db.putJsonView(ddocName, viewName, jsonview)
 
-Compiles a JsonView to a JavaScript view and adds it to a design document, creating that document if necessary. *If a view already exists by this name, the view will be overwritten.*
-
-Returns as though you had run [`db.put()`](https://pouchdb.com/api.html#create_document).
+Compiles a JsonView to a JavaScript view and adds it to a design document, using `db.putView` under the hood.
 
 ### async db.removeView(ddocName, viewName)
 
@@ -131,12 +140,24 @@ An access parameter may also be an object. In its object form, it may have these
 - `access`: A string access parameter, such as `'foo'` or `'foo.bar'`.
 - `transform`: The string name of a *transform* helper, such as `date` or `time`.
 - `splay`: When used with an array, emits one row per entry in the array. Otherwise, the whole array is emitted in just one row. For example, for a news website, you might emit one row per tag per article, rather than emitting the whole list of tags in one row per article.
+- `flatten`: When used with an array, `flatten: true` flattens the array into each row's keys rather than emitting the whole array as a single key.
+- `emit`: An access parameter with `emit: true` will only emit a row if the document contains the accessed property. For example, `{ access: 'some_field', emit: true }` will only emit rows if the `some_field` property exists and is truthy. Properties accessed this way are not emitted as part of the key. `emit` does nothing when used to calculate a value.
+- `equals`: Used with `emit: true`, this property allows you to specify a value to which the accessed property should be compared. For example, `{ access: 'type', emit: true, equals: 'entry' }` will only emit rows if the property `type` equals `'entry'`.
+- `invert`: Used with `emit: true`, this property inverts the accessed property so that rows are emitted only if it is falsy. Can be used with `equals` to indicate that something should not be equal to a given value.
 
 These are the currently available transforms:
 
-- `date`: Converts a Unix timestamp or other `Date` initialization parameter(s) into a string date of the form 'YYYY-MM-DD'.
-- `time`: Converts a Unix timestamp or other `Date` initialization parameter(s) into a string time of the form 'HH:MM:SS.ms'.
-- `datetime`: Converts a Unix timestamp or other `Date` initialization parameter(s) into a string datetime of the form 'YYYY-MM-DDTHH:MM:SS.ms'.
+- `date`: Converts a Unix timestamp or other `Date` initialization parameter(s) into an array of the form `[year, month, day]`.
+- `year`: Converts a Unix timestamp or other `Date` initialization parameter(s) into a N-length string, representing the timestamp's year.
+- `month`: Converts a Unix timestamp or other `Date` initialization parameter(s) into a 2-length string, representing the timestamp's month in the year.
+- `year-month`: Converts a Unix timestamp or other `Date` initialization parameter(s) into an array of the form `[year, month]`.
+- `day`: Converts a Unix timestamp or other `Date` initialization parameter(s) into a 2-length string, representing the timestamp's day in the month.
+- `time`: Converts a Unix timestamp or other `Date` initialization parameter(s) into an array of the form `[hour, minute, second, millisecond]`.
+- `hour`: Converts a Unix timestamp or other `Date` initialization parameter(s) into a 2-length string, representing the timestamp's hour in 24-hour time.
+- `minute`: Converts a Unix timestamp or other `Date` initialization parameter(s) into a 2-length string, representing the timestamp's minute in a 60-minute hour.
+- `datetime`: Converts a Unix timestamp or other `Date` initialization parameter(s) into an array of the form `[year, month, day, hour, minute, second, millisecond]`.
+
+*Note that because the datetime utilities use an ISO representation of dates internally, all times use UTC+0 as their timezone and all years are Gregorian.*
 
 ## Development
 

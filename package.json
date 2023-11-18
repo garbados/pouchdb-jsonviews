@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "npm run test:lint && npm run test:node && npm run test:browser",
-    "test:lint": "standard index.js test.js & dependency-check --unused --no-dev .",
+    "test:lint": "standard index.js test.js && dependency-check --unused --no-dev .",
     "test:node": "mocha",
     "test:browser": "mochify --transform envify test.js",
     "cov": "npm run cov:node && npm run cov:browser && nyc report",

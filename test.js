@@ -221,6 +221,17 @@ function test (dbName) {
             assert.equal(date.length, 7)
           })
         })
+        describe('words', function () {
+          it('should split a text value into words', async function () {
+            const text = 'i am a gay baby'
+            await this.db.post({ text })
+            await this.db.addJsonView(DDOC_NAME, VIEW_NAME, {
+              map: { key: { access: 'text', transform: 'words', splay: true } }
+            })
+            const { rows } = await this.db.query(`${DDOC_NAME}/${VIEW_NAME}`)
+            assert.equal(rows.length, 5)
+          })
+        })
       })
       describe('splay', function () {
         it('should splay a lone key', async function () {

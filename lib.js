@@ -48,6 +48,9 @@ function transformValue (pattern, value) {
     case 'datetime':
       value = datetime
       break
+    case 'words':
+      value = value.split(/[\s"]+/)
+      break
   }
   if (pattern.splay || pattern.emit || pattern.flatten) {
     var result = { value: value }

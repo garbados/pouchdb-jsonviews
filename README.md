@@ -156,6 +156,7 @@ These are the currently available transforms:
 - `hour`: Converts a Unix timestamp or other `Date` initialization parameter(s) into a 2-length string, representing the timestamp's hour in 24-hour time.
 - `minute`: Converts a Unix timestamp or other `Date` initialization parameter(s) into a 2-length string, representing the timestamp's minute in a 60-minute hour.
 - `datetime`: Converts a Unix timestamp or other `Date` initialization parameter(s) into an array of the form `[year, month, day, hour, minute, second, millisecond]`.
+- `words`: Split a text field on whitespace and quotations, into an array of strings. Useful with `splay`.
 
 *Note that because the datetime utilities use an ISO representation of dates internally, all times use UTC+0 as their timezone and all years are Gregorian.*
 

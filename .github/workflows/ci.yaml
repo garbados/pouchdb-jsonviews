@@ -12,25 +12,19 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [18, 20, 22]
+        node: [16, 18, 20]
         couchdb: ["2.3", "3.3"]
     steps:
       - uses: iamssen/couchdb-github-action@master
         with:
           couchdb-version: ${{ matrix.couchdb }}
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-
-      - uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          cache: 'npm'
 
       - run: npm i -g add-cors-to-couchdb
       - run: add-cors-to-couchdb -u admin -p password
@@ -60,20 +54,14 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, macos-latest]
-        node: [12, 14, 16]
+        node: [16, 18, 20]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-
-      - uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          cache: 'npm'
 
       - run: npm ci
 

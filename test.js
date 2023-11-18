@@ -223,13 +223,14 @@ function test (dbName) {
         })
         describe('words', function () {
           it('should split a text value into words', async function () {
-            const text = 'i am a gay baby'
+            const text = 'i am a gay baby; this is another clause...'
             await this.db.post({ text })
             await this.db.addJsonView(DDOC_NAME, VIEW_NAME, {
               map: { key: { access: 'text', transform: 'words', splay: true } }
             })
             const { rows } = await this.db.query(`${DDOC_NAME}/${VIEW_NAME}`)
-            assert.equal(rows.length, 5)
+            assert.equal(rows.length, 9)
+            assert.equal(1, rows.filter(({ key }) => key === 'baby').length)
           })
         })
       })

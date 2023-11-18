@@ -49,7 +49,7 @@ function transformValue (pattern, value) {
       value = datetime
       break
     case 'words':
-      value = value.split(/[\s"]+/)
+      value = value.split(/[\s"\.,;-]+/).filter(function (x) { return !!x })
       break
   }
   if (pattern.splay || pattern.emit || pattern.flatten) {

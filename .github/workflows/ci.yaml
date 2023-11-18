@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [12, 14, 16]
-        couchdb: ["2.3", "3.1"]
+        node: [18, 20, 22]
+        couchdb: ["2.3", "3.3"]
     steps:
       - uses: iamssen/couchdb-github-action@master
         with:

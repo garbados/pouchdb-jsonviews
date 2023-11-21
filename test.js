@@ -232,6 +232,15 @@ function test (dbName) {
             assert.equal(rows.length, 9)
             assert.equal(1, rows.filter(({ key }) => key === 'baby').length)
           })
+          it('should lowercase all indexed values', async function () {
+            const text = 'Hello world!'
+            await this.db.post({ text })
+            await this.db.addJsonView(DDOC_NAME, VIEW_NAME, {
+              map: { key: { access: 'text', transform: 'words', splay: true } }
+            })
+            const { rows } = await this.db.query(`${DDOC_NAME}/${VIEW_NAME}`, { key: 'hello' })
+            assert.equal(rows.length, 1)
+          })
         })
       })
       describe('splay', function () {
